@@ -64,14 +64,16 @@ class App extends Component {
         </Section>
 
         <Section title="Contacts">
-          <Filter
-            heandlerInputChange={this.heandlerInputChange}
-            filter={this.state.filter}
-          />
-          <ContactList
-            getFilterContacts={this.getFilterContacts}
-            removeContact={this.removeContact}
-          />
+          <>
+            <Filter
+              heandlerInputChange={this.heandlerInputChange}
+              filter={this.state.filter}
+            />
+            <ContactList
+              getFilterContacts={this.getFilterContacts}
+              removeContact={this.removeContact}
+            />
+          </>
         </Section>
       </>
     );
