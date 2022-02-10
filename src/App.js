@@ -1,4 +1,4 @@
-import { Component } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 import { nanoid } from "nanoid";
 import Section from "./Components/Section/Section";
@@ -6,78 +6,59 @@ import Filter from "./Components/Filter/Filter";
 import ContactList from "./Components/ContactList/ContactList";
 import ContactForm from "./Components/ContactForm/ContactForm";
 
-class App extends Component {
-  state = {
-    contacts: [],
-    filter: "",
+const App = () => {
+  const [contacts, setContacts] = useState(
+    () => JSON.parse(localStorage.getItem("contact")) || []
+  );
+
+  const [filter, setFilter] = useState("");
+
+  useEffect(() => {
+    localStorage.setItem("contact", JSON.stringify(contacts));
+  }, [contacts]);
+
+  const heandlerInputChange = (event) => {
+    const { value } = event.target;
+    setFilter(value);
   };
 
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.contact !== this.state.contacts) {
-      localStorage.setItem("contact", JSON.stringify(this.state.contacts));
-    }
-  }
-  componentDidMount() {
-    const contacts = JSON.parse(localStorage.getItem("contact")) || [];
-    this.setState({ contacts }); //{contacts: contacts}
-  }
+  const removeContact = (id) =>
+    setContacts((prev) => prev.filter((el) => el.id !== id));
 
-  heandlerInputChange = (event) => {
-    const { name, value } = event.target;
-    this.setState({ [name]: value });
-  };
-
-  removeContact = (id) =>
-    this.setState((prev) => ({
-      contacts: prev.contacts.filter((el) => el.id !== id),
-    }));
-
-  onContactSubmit = (user) => {
-    const array = this.state.contacts;
+  const onContactSubmit = (user) => {
+    const array = contacts;
     for (const obj of array) {
       if (obj.name.includes(user.name)) {
         return alert(`${user.name} is olredy in contact`);
       }
     }
-    this.setState((prevState) => ({
-      contacts: [...prevState.contacts, { ...user, id: nanoid() }],
-    }));
+    setContacts((prev) => [...prev, { ...user, id: nanoid() }]);
   };
-
-  getFilterContacts = () => {
-    const normalizedFilter = this.state.filter.toLocaleLowerCase();
-    const filterEl = this.state.contacts;
-    const findEl = filterEl.filter((contact) =>
+  const getFilterContacts = () => {
+    const normalizedFilter = filter.toLocaleLowerCase();
+    const findEl = contacts.filter((contact) =>
       contact.name.toLocaleLowerCase().includes(normalizedFilter)
     );
     return findEl;
   };
 
-  render() {
-    return (
-      <>
-        <Section title="Phonebook">
-          <ContactForm
-            onContactSubmit={this.onContactSubmit}
-            contscts={this.state.contacts}
-          />
-        </Section>
+  return (
+    <>
+      <Section title="Phonebook">
+        <ContactForm onContactSubmit={onContactSubmit} contscts={contacts} />
+      </Section>
 
-        <Section title="Contacts">
-          <>
-            <Filter
-              heandlerInputChange={this.heandlerInputChange}
-              filter={this.state.filter}
-            />
-            <ContactList
-              getFilterContacts={this.getFilterContacts}
-              removeContact={this.removeContact}
-            />
-          </>
-        </Section>
-      </>
-    );
-  }
-}
+      <Section title="Contacts">
+        <>
+          <Filter heandlerInputChange={heandlerInputChange} filter={filter} />
+          <ContactList
+            getFilterContacts={getFilterContacts}
+            removeContact={removeContact}
+          />
+        </>
+      </Section>
+    </>
+  );
+};
 
 export default App;
